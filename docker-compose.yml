@@ -1,0 +1,161 @@
+version: '3.3'
+
+# Software list: https://www.softaculous.com/softwares
+services:
+  db:
+    image: mariadb:latest
+    ports: ["3307:3306"]
+    volumes:
+      - db_data:/var/lib/mysql
+      - ${PWD}/mysql-init.sql:/docker-entrypoint-initdb.d/mysql-init.sql
+    networks: [sites_net]
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpw
+
+  # User: demo@prestashop.com
+  # Password: prestashop_demo
+  prestashop:
+    depends_on: [db]
+    image: prestashop/prestashop:latest
+    ports: ["8001:80"]
+    networks: [sites_net]
+    environment:
+      DB_SERVER: db
+      DB_USER: prestashop
+      DB_PASSWD: prestashoppw
+      DB_NAME: prestashop
+
+  # User: user
+  # Password: bitnami1
+  opencart:
+    depends_on: [db]
+    image: bitnami/opencart:latest
+    ports: ["8002:80"]
+    networks: [sites_net]
+    environment:
+      MARIADB_HOST: db
+      MARIADB_PORT_NUMBER: 3306
+      OPENCART_DATABASE_USER: opencart
+      OPENCART_DATABASE_NAME: opencart
+      OPENCART_DATABASE_PASSWORD: opencartpw
+      OPENCART_HOST: opencart.idp.flakebi.de
+    volumes: ["opencart_data:/bitnami"]
+
+  spree:
+    build: ./spree
+    depends_on: [db]
+    ports: ["8003:3000"]
+    networks: [sites_net]
+
+  drupal_commerce_kickstart:
+    depends_on: [db]
+    image: capgemini/apollo-commerce-kickstart:latest
+    ports: ["8004:80"]
+    networks: [sites_net]
+    environment:
+      DRUPAL_DB_HOST: db
+      DRUPAL_DB_NAME: drupal_commerce
+      DRUPAL_DB_USER: drupal_commerce
+      DRUPAL_DB_PASSWORD: drupal_commercepw
+
+  oscommerce:
+    build: ./oscommerce
+    depends_on: [db]
+    ports: ["8005:80"]
+    networks: [sites_net]
+
+  thelia:
+    build: ./thelia
+    depends_on: [db]
+    ports: ["8006:80"]
+    networks: [sites_net]
+
+  seotoaster:
+    build: ./seotoaster
+    ports: ["8007:80"]
+    networks: [sites_net]
+
+  shopware:
+    build: ./shopware
+    depends_on: [db]
+    environment:
+      PHPMYADMIN_PW: phpmyadminpw
+      DB_USER: shopware
+      DB_PASSWORD: shopwarepw
+      DB_DATABASE: shopware
+      DB_HOST: db
+    volumes:
+      - shopware_data:/var/www/html
+    ports: ["8008:80"]
+    networks: [sites_net]
+
+  abantecart:
+    build: ./abantecart
+    ports: ["8009:80"]
+    networks: [sites_net]
+
+  cubecart:
+    build: ./cubecart
+    ports: ["8010:80"]
+    networks: [sites_net]
+
+  zencart:
+    build: ./zencart
+    depends_on: [db]
+    ports: ["8013:80"]
+    networks: [sites_net]
+
+  thirtybees:
+    build: ./thirtybees
+    depends_on: [db]
+    ports: ["8014:80"]
+    networks: [sites_net]
+
+  litecart:
+    build: ./litecart
+    depends_on: [db]
+    ports: ["8015:80"]
+    networks: [sites_net]
+
+  avactis:
+    build: ./avactis
+    depends_on: [db]
+    ports: ["8017:80"]
+    networks: [sites_net]
+
+  xcart:
+    build: ./xcart
+    depends_on: [db]
+    ports: ["8018:80"]
+    networks: [sites_net]
+
+  quickcart:
+    build: ./quickcart
+    depends_on: [db]
+    ports: ["8019:80"]
+    networks: [sites_net]
+
+  alegrocart:
+    build: ./alegrocart
+    depends_on: [db]
+    ports: ["8020:80"]
+    networks: [sites_net]
+
+  arastta:
+    build: ./arastta
+    depends_on: [db]
+    ports: ["8021:80"]
+    networks: [sites_net]
+
+volumes:
+  db_data:
+  opencart_data:
+  shopware_data:
+
+networks:
+  sites_net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.1.1.0/24
